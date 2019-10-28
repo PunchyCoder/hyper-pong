@@ -8,7 +8,11 @@
 	<!-- <link rel="stylesheet" href="stylesheet.css" type="text/css"> -->
 </head>
 <body>
-	<canvas id="game-scene" width="800" height="800"></canvas>
+	<ul id="score-board">
+		<li id="p1-score">0</li>
+		<li id="p2-score">0</li>
+	</ul>
+	<canvas id="game-scene" width="900" height="500"></canvas>
 </body>
 	<script type="text/javascript">
 		
@@ -19,6 +23,11 @@
 					const { width: w, height: h } = canvas;
 					const tableBoundary_x = 5;
 					const tableBoundary_y = 5;
+					const score_p1 = document.getElementById("p1-score");
+					const score_p2 = document.getElementById("p2-score");
+
+					function updateScoreBoard(){}
+					
 		
 					let ball = {
 
@@ -35,42 +44,107 @@
 							context.fillStyle = ball.color;
 							context.fill();
 						},
-					}
-
-					let paddle = {
-
-						xPosition: 20,
-						yPosition: 100,
-						width: 10,
-						length: 50,
-						speed: 5,
-						color: "lightblue",
-
-						draw: function() {
-							console.log("drawing paddle...")
-							context.fillStyle = paddle.color;
-							context.fillRect(paddle.xPosition, paddle.yPosition, paddle.width, paddle.length)
-						},
 
 						move: function() {
 							ball.xPosition += ball.xSpeed;
 							ball.yPosition += ball.ySpeed;
 						},
+					}
+
+					let Paddle = function(name, player, x, y, w, l, buffer, speed, color) {
+						this.name = name;
+						this.isPlayer = player;
+						this.score = 0;
+						this.xPosition = x;
+						this.yPosition = y;
+						this.width = w;
+						this.length = l;
+						this.buffer = buffer;
+						this.speed = speed;
+						this.color = color;
+
+						this.drawPaddle = function() {
+							context.fillStyle = this.color;
+							context.fillRect(this.xPosition, this.yPosition, this.width, this.length)
+						};
+
+						this.movePaddle = function() {
+							if (keyControls.keys['38'] === true) {
+								this.yPosition -= this.speed;
+							}
+							if (keyControls.keys['40'] === true) {
+								this.yPosition += this.speed;
+							}
+						};
+
+						this.handlePaddleBallCollision = function() {
+							// Checks for Paddle collision
+							
+							if (this.isPlayer === 1) {
+								
+								if (ball.xPosition <= this.xPosition + this.width + this.buffer &&
+									ball.yPosition >= this.yPosition &&
+									ball.yPosition <= this.yPosition + this.length ) {
+									console.log("Player 1 collided with ball..")
+									ball.xSpeed = -ball.xSpeed;
+									findAngleDeflection(this.yPosition, this.length);
+								}
+							} else {
+								
+								if (ball.xPosition >= this.xPosition - this.buffer &&
+									ball.yPosition >= this.yPosition &&
+									ball.yPosition <= this.yPosition + this.length ) {
+									console.log("AI collided with ball..")
+									ball.xSpeed = -ball.xSpeed;
+									findAngleDeflection(this.yPosition, this.length);
+								}
+							}
+							
+						};
 
 					};
 
 
-		
+					let player = new Paddle("The Hero", 1, 20, 100, 10, 100, 5, 5, "dodgerblue");
+					let AI = new Paddle("The Dominatrix", 2, w-20, 100, 10, 100, 5, 5, "purple");
+
+					let keyControls = {
+						keys: {
+							37: false,
+							38: false,
+							39: false,
+							40: false
+						},
+						
+					};
+
+					document.addEventListener("keydown", (e) => {
+						e.preventDefault;
+						keyControls.keys[e.which] = true;
+					})
+
+					document.addEventListener("keyup", (e) => {
+						e.preventDefault;
+						keyControls.keys[e.which] = false;
+					})
+
+
+					function keepScore(player) {
+						player += 1;
+					}
+
 					function drawScreen(color) {
 						context.fillStyle = color;
 						context.fillRect(0, 0, w, h);
 					}
+
+					function findAngleDeflection(paddleYPos, paddleLength){
+						var deltaY = ball.yPosition - (paddleYPos + paddleLength/2);
+						ball.ySpeed = deltaY * 0.2;
+					};
 		
 
-					
-
-					function ballCollision() {
-
+					function handleBoundaryBallCollision() {
 						// Checks for X-axis boundary collision
 						// canvas.width - tableBoundary_x
 						ball.xSpeed = ball.xPosition >= w-tableBoundary_x || ball.xPosition <= tableBoundary_x  ?  ball.xSpeed *=-1  :  ball.xSpeed;
@@ -78,29 +152,39 @@
 						// Checks for Y-axis boundary collision
 						// canvas.width = tableBoundary_y
 						ball.ySpeed = ball.yPosition >= h-tableBoundary_y || ball.yPosition  <= tableBoundary_y  ?  ball.ySpeed *=-1  :  ball.ySpeed;
+
+						if(ball.xPosition <= 0) {
+							keepScore(player.score);
+						}
+
 						 
 					}
 
 					// Core Functions and Loop
 					//---------------------------------------------
 		
-					function handle_UserInput(){};
+					function handle_UserInput(){
+						
+					};
 		
 					function move_Everything(){
-						move_ball();
+						ball.move();
+						player.movePaddle();
+						AI.movePaddle();
 					};
 		
 					function handle_Collision(){
-						ballCollision();
+						handleBoundaryBallCollision();
+						player.handlePaddleBallCollision();
+						AI.handlePaddleBallCollision();
 					};
 		
 					function draw_Everything(){
 						drawScreen("black");
 
-						paddle.draw();
+						player.drawPaddle();
+						AI.drawPaddle();
 						ball.draw();
-
-						console.log("draw -", ball.xPosition, ball.yPosition);
 					};
 			
 			
@@ -117,6 +201,7 @@
 					}
 
 					requestAnimationFrame(gameLoop);
+						}
 		
 				})();
 
