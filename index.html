@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>title</title>
+	<!-- <link rel="stylesheet" href="stylesheet.css" type="text/css"> -->
+</head>
+<body>
+	<canvas id="game-scene" width="800" height="800"></canvas>
+</body>
+	<script type="text/javascript">
+		
+		const game = (function() {
+		
+					const canvas = document.getElementById("game-scene");
+					const context = canvas.getContext("2d");
+					const { width: w, height: h } = canvas;
+					const tableBoundary_x = 5;
+					const tableBoundary_y = 5;
+		
+					let ball = {
+
+						xPosition: 100,
+						yPosition: 50,
+						radius: 10,
+						xSpeed: 5,
+						ySpeed: 3,
+						color: "white",
+
+						draw: function() {
+							context.beginPath();
+							context.arc(ball.xPosition, ball.yPosition, ball.radius, 0, Math.PI *2);
+							context.fillStyle = ball.color;
+							context.fill();
+						},
+					}
+
+					let paddle = {
+
+						xPosition: 20,
+						yPosition: 100,
+						width: 10,
+						length: 50,
+						speed: 5,
+						color: "lightblue",
+
+						draw: function() {
+							console.log("drawing paddle...")
+							context.fillStyle = paddle.color;
+							context.fillRect(paddle.xPosition, paddle.yPosition, paddle.width, paddle.length)
+						},
+
+						move: function() {
+							ball.xPosition += ball.xSpeed;
+							ball.yPosition += ball.ySpeed;
+						},
+
+					};
+
+
+		
+					function drawScreen(color) {
+						context.fillStyle = color;
+						context.fillRect(0, 0, w, h);
+					}
+		
+
+					
+
+					function ballCollision() {
+
+						// Checks for X-axis boundary collision
+						// canvas.width - tableBoundary_x
+						ball.xSpeed = ball.xPosition >= w-tableBoundary_x || ball.xPosition <= tableBoundary_x  ?  ball.xSpeed *=-1  :  ball.xSpeed;
+
+						// Checks for Y-axis boundary collision
+						// canvas.width = tableBoundary_y
+						ball.ySpeed = ball.yPosition >= h-tableBoundary_y || ball.yPosition  <= tableBoundary_y  ?  ball.ySpeed *=-1  :  ball.ySpeed;
+						 
+					}
+
+					// Core Functions and Loop
+					//---------------------------------------------
+		
+					function handle_UserInput(){};
+		
+					function move_Everything(){
+						move_ball();
+					};
+		
+					function handle_Collision(){
+						ballCollision();
+					};
+		
+					function draw_Everything(){
+						drawScreen("black");
+
+						paddle.draw();
+						ball.draw();
+
+						console.log("draw -", ball.xPosition, ball.yPosition);
+					};
+			
+			
+					// Game Loop
+					// --------------------------------------------
+					function gameLoop(t) {
+						requestAnimationFrame(gameLoop);
+		
+						// Game logic code..
+						// handle_UserInput();
+						move_Everything();
+						handle_Collision()
+						draw_Everything();
+					}
+
+					requestAnimationFrame(gameLoop);
+		
+				})();
+
+
+	</script>
+</html>
