@@ -26,43 +26,39 @@
 					const score_p1 = document.getElementById("p1-score");
 					const score_p2 = document.getElementById("p2-score");
 
-					function updateScoreBoard(){}
-					
-		
+					let game_state = "MENU";
+							
 					let ball = {
-
 						xPosition: 100,
 						yPosition: 50,
 						radius: 10,
 						xSpeed: 5,
 						ySpeed: 3,
 						color: "white",
-
 						draw: function() {
 							context.beginPath();
 							context.arc(ball.xPosition, ball.yPosition, ball.radius, 0, Math.PI *2);
 							context.fillStyle = ball.color;
 							context.fill();
 						},
-
 						move: function() {
 							ball.xPosition += ball.xSpeed;
 							ball.yPosition += ball.ySpeed;
 						},
 					}
 
+
 					let Paddle = function(name, player, x, y, w, l, buffer, speed, color) {
 						this.name = name;
-						this.isPlayer = player;
-						this.score = 0;
 						this.xPosition = x;
 						this.yPosition = y;
 						this.width = w;
 						this.length = l;
 						this.buffer = buffer;
-						this.speed = speed;
 						this.color = color;
-
+						this.speed = speed;
+						this.isPlayer = player;
+						this.score = 0;
 						this.drawPaddle = function() {
 							context.fillStyle = this.color;
 							context.fillRect(this.xPosition, this.yPosition, this.width, this.length)
@@ -79,30 +75,25 @@
 
 						this.handlePaddleBallCollision = function() {
 							// Checks for Paddle collision
-							
 							if (this.isPlayer === 1) {
-								
 								if (ball.xPosition <= this.xPosition + this.width + this.buffer &&
 									ball.yPosition >= this.yPosition &&
-									ball.yPosition <= this.yPosition + this.length ) {
+									ball.yPosition <= this.yPosition + this.length ) 
+								{
 									console.log("Player 1 collided with ball..")
 									ball.xSpeed = -ball.xSpeed;
 									findAngleDeflection(this.yPosition, this.length);
 								}
-							} else {
-								
-								if (ball.xPosition >= this.xPosition - this.buffer &&
+							} else if (ball.xPosition >= this.xPosition - this.buffer &&
 									ball.yPosition >= this.yPosition &&
-									ball.yPosition <= this.yPosition + this.length ) {
-									console.log("AI collided with ball..")
-									ball.xSpeed = -ball.xSpeed;
-									findAngleDeflection(this.yPosition, this.length);
-								}
-							}
-							
-						};
-
-					};
+									ball.yPosition <= this.yPosition + this.length ) 
+							{
+										console.log("AI collided with ball..")
+										ball.xSpeed = -ball.xSpeed;
+										findAngleDeflection(this.yPosition, this.length);
+							}//end else
+						}//end handler
+					};//end function
 
 
 					let player = new Paddle("The Hero", 1, 20, 100, 10, 100, 5, 5, "dodgerblue");
@@ -118,19 +109,70 @@
 						
 					};
 
-					document.addEventListener("keydown", (e) => {
-						e.preventDefault;
-						keyControls.keys[e.which] = true;
-					})
+					//STATE: Game Setup
+					//--------------------------------------------------------
+					//document.addEventListener("")
 
-					document.addEventListener("keyup", (e) => {
-						e.preventDefault;
-						keyControls.keys[e.which] = false;
-					})
+					//STATE: Game Play
+					//--------------------------------------------------------
+					function handleEvents() {
+						document.addEventListener("keydown", (e) => {
+							e.preventDefault;
+							keyControls.keys[e.which] = true;
+							if (e.which === 32) {
+							}
+						})
 
+						document.addEventListener("keyup", (e) => {
+							e.preventDefault;
+							keyControls.keys[e.which] = false;
 
-					function keepScore(player) {
-						player += 1;
+						})
+
+						// Controlling State with Enter key!
+						document.addEventListener("keypress", (e) => {
+							if (game_state === "PLAY") {
+								e.preventDefault;
+								if (e.which === 13 || e.which === 32) {  // Enter key
+									game_state = "PAUSE";
+									console.log("Enter pressed!")
+								}
+							}
+							else if (game_state === "PAUSE") {
+								e.preventDefault;
+								if (e.which === 13 || e.which === 32) {  // Enter key
+									game_state = "PLAY";
+									console.log("Enter pressed!")
+								}
+							}
+							else if (game_state === "MENU") {
+								e.preventDefault;
+									game_state = "PLAY";
+							}
+
+							
+
+						})
+					};
+
+					handleEvents();
+					
+
+					function updateScoreBoard(){
+						score_p1.textContent = player.score;
+						score_p2.textContent = AI.score;
+					}
+
+					function keepScore(scoree) {
+						ball.xPosition = w/2;
+						ball.yPosition = h/2;
+						ball.xSpeed = 0;
+						ball.ySpeed = 0;
+
+						console.log("before: ", scoree.score);
+						scoree.score += 1;
+						console.log("after: ", scoree.score);
+						updateScoreBoard();
 					}
 
 					function drawScreen(color) {
@@ -145,32 +187,79 @@
 		
 
 					function handleBoundaryBallCollision() {
-						// Checks for X-axis boundary collision
-						// canvas.width - tableBoundary_x
-						ball.xSpeed = ball.xPosition >= w-tableBoundary_x || ball.xPosition <= tableBoundary_x  ?  ball.xSpeed *=-1  :  ball.xSpeed;
-
 						// Checks for Y-axis boundary collision
 						// canvas.width = tableBoundary_y
 						ball.ySpeed = ball.yPosition >= h-tableBoundary_y || ball.yPosition  <= tableBoundary_y  ?  ball.ySpeed *=-1  :  ball.ySpeed;
 
 						if(ball.xPosition <= 0) {
-							keepScore(player.score);
+							console.log("player Score b4 calling keepScore()...", AI.score);
+							keepScore(AI);
 						}
-
-						 
+						if(ball.xPosition >= w) {
+							console.log("AI Score b4 calling keepScore()...", player.score);
+							keepScore(player);
+						}
 					}
+
+					// Draw Text Functions
+					//---------------------------------------------
+					function writeText(text, size, xPos, yPos, intLineNum) {
+						if (!intLineNum) { intLineNum = 1 } 
+						const lineSpace = (intLineNum+1) * size + yPos;
+						context.fillStyle = "white";
+						context.font = size+"px Arial";
+						context.textAlign = "center";
+						context.fillText(text, xPos, lineSpace); // canvas.w/2, 50
+					}
+
+					// State Events
+					//---------------------------------------------
+					function onPause() {
+						drawScreen("black");
+						player.drawPaddle();
+						AI.drawPaddle();
+						ball.draw();
+						drawScreen("rgba(100, 0, 100, 0.6)");
+						writeText("P A U S E", 40, 450, 100, 1);
+						writeText("P A U S E", 40, 450, 100, 2);
+						writeText("P A U S E", 40, 450, 100, 3);
+					}
+
+					function onPlay() {
+						drawScreen("black");
+						player.drawPaddle();
+						AI.drawPaddle();
+						ball.draw();
+					}
+
+					function onMenu() {
+						drawScreen("black");
+						writeText("H y p e r  P o n g", 40, 450, 100);
+						writeText("press  [space]  to play, Cowboy", 20, 450, 300);
+					}
+
+
+
+
 
 					// Core Functions and Loop
 					//---------------------------------------------
 		
-					function handle_UserInput(){
-						
-					};
+					//function handle_UserInput(){};
 		
 					function move_Everything(){
-						ball.move();
-						player.movePaddle();
-						AI.movePaddle();
+						if (game_state === "MENU") {
+
+						}
+						if (game_state === "PLAY") {
+							ball.move();
+							player.movePaddle();
+							AI.movePaddle();
+						}
+						if (game_state === "PAUSE") {
+
+						}
+							
 					};
 		
 					function handle_Collision(){
@@ -178,26 +267,33 @@
 						player.handlePaddleBallCollision();
 						AI.handlePaddleBallCollision();
 					};
-		
-					function draw_Everything(){
-						drawScreen("black");
 
-						player.drawPaddle();
-						AI.drawPaddle();
-						ball.draw();
+					function draw_Everything(){
+						if (game_state === "MENU") {
+							onMenu();
+						}
+						if (game_state === "PLAY") {
+							onPlay();
+						}
+						if (game_state === "PAUSE") {
+							onPause();
+						}
+
+						
 					};
 			
 			
 					// Game Loop
 					// --------------------------------------------
 					function gameLoop(t) {
-						requestAnimationFrame(gameLoop);
-		
 						// Game logic code..
 						// handle_UserInput();
 						move_Everything();
 						handle_Collision()
 						draw_Everything();
+
+						// Loop Again...
+						requestAnimationFrame(gameLoop);
 					}
 
 					requestAnimationFrame(gameLoop);
