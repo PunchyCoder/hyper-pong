@@ -7,6 +7,7 @@
 	<title>title</title>
 	<!-- <link rel="stylesheet" href="stylesheet.css" type="text/css"> -->
 </head>
+
 <body>
 	<ul id="score-board">
 		<li id="p1-score">0</li>
@@ -27,13 +28,15 @@
 					const score_p2 = document.getElementById("p2-score");
 
 					let game_state = "MENU";
+					const winningScore = 2;
 							
 					let ball = {
 						xPosition: 100,
 						yPosition: 50,
 						radius: 10,
-						xSpeed: 5,
-						ySpeed: 3,
+						speedBase: 9,
+						xSpeed: 9,
+						ySpeed: 4,
 						color: "white",
 						draw: function() {
 							context.beginPath();
@@ -48,15 +51,15 @@
 					}
 
 
-					let Paddle = function(name, player, x, y, w, l, buffer, speed, color) {
+					let Paddle = function(name, player, x, y, w, buffer, color) {
 						this.name = name;
 						this.xPosition = x;
 						this.yPosition = y;
 						this.width = w;
-						this.length = l;
+						this.length = 70;
 						this.buffer = buffer;
 						this.color = color;
-						this.speed = speed;
+						this.speed = 9;
 						this.isPlayer = player;
 						this.score = 0;
 						this.drawPaddle = function() {
@@ -96,8 +99,8 @@
 					};//end function
 
 
-					let player = new Paddle("The Hero", 1, 20, 100, 10, 100, 5, 5, "dodgerblue");
-					let AI = new Paddle("The Dominatrix", 2, w-20, 100, 10, 100, 5, 5, "purple");
+					let player = new Paddle("The Hero", 1, 20, 100, 10, 5, "dodgerblue");
+					let AI = new Paddle("The Dominatrix", 2, w-20, 100, 10, 5, "purple");
 
 					let keyControls = {
 						keys: {
@@ -131,47 +134,55 @@
 
 						// Controlling State with Enter key!
 						document.addEventListener("keypress", (e) => {
-							if (game_state === "PLAY") {
-								e.preventDefault;
-								if (e.which === 13 || e.which === 32) {  // Enter key
-									game_state = "PAUSE";
-									console.log("Enter pressed!")
-								}
-							}
-							else if (game_state === "PAUSE") {
-								e.preventDefault;
-								if (e.which === 13 || e.which === 32) {  // Enter key
-									game_state = "PLAY";
-									console.log("Enter pressed!")
-								}
-							}
-							else if (game_state === "MENU") {
-								e.preventDefault;
-									game_state = "PLAY";
-							}
 
-							
+							if (e.which === 13 || e.which === 32) {
 
+								if 		(game_state === "PLAY") 	{ game_state = "PAUSE";}
+								else if (game_state === "PAUSE") 	{ game_state = "PLAY"; }
+								else if (game_state === "MENU") 	{ game_state = "PLAY"; }
+								else if (game_state === "SCORE") 	{ game_state = "PLAY"; }
+								else if (game_state === "WIN" || game_state === "LOSE") 	{ game_state = "MENU"; }
+							}
 						})
 					};
 
+
 					handleEvents();
 					
-
 					function updateScoreBoard(){
 						score_p1.textContent = player.score;
 						score_p2.textContent = AI.score;
 					}
 
-					function keepScore(scoree) {
-						ball.xPosition = w/2;
-						ball.yPosition = h/2;
-						ball.xSpeed = 0;
-						ball.ySpeed = 0;
+					function resetScores() {
+						player.score = 0;
+						AI.score = 0;
+					}
 
-						console.log("before: ", scoree.score);
-						scoree.score += 1;
-						console.log("after: ", scoree.score);
+					function keepScore(whichPlayerScores) {
+							// stop 
+							ball.xSpeed = ball.speedBase;
+							ball.ySpeed = ball.speedBase; 
+							// increase Score
+							whichPlayerScores.score++;
+							console.log(whichPlayerScores, "player:", player.score, "AI:", AI.score)
+							// Change state => SCORE
+							game_state = "SCORE";
+							// Setup ball
+							// Player serves
+							ball.xPosition = canvas.width/2;
+							ball.yPosition = h/2;
+
+							if (whichPlayerScores === player) {
+								ball.xSpeed = -ball.speedBase;
+								ball.ySpeed = 0;
+							} else {
+								ball.xSpeed = ball.speedBase;
+								ball.ySpeed = 0;
+							}
+							// change state => PLAY
+							// game_state = "PLAY";
+						
 						updateScoreBoard();
 					}
 
@@ -182,7 +193,7 @@
 
 					function findAngleDeflection(paddleYPos, paddleLength){
 						var deltaY = ball.yPosition - (paddleYPos + paddleLength/2);
-						ball.ySpeed = deltaY * 0.2;
+						ball.ySpeed = deltaY * 0.25;
 					};
 		
 
@@ -215,7 +226,7 @@
 					// State Events
 					//---------------------------------------------
 					function onPause() {
-						drawScreen("black");
+						drawScreen("rgba(0, 0, 0, 0.2)");
 						player.drawPaddle();
 						AI.drawPaddle();
 						ball.draw();
@@ -226,7 +237,7 @@
 					}
 
 					function onPlay() {
-						drawScreen("black");
+						drawScreen("rgba(0, 0, 0, 0.2)");
 						player.drawPaddle();
 						AI.drawPaddle();
 						ball.draw();
@@ -236,6 +247,38 @@
 						drawScreen("black");
 						writeText("H y p e r  P o n g", 40, 450, 100);
 						writeText("press  [space]  to play, Cowboy", 20, 450, 300);
+					}
+
+					function onScore() {
+						if ( player.score === winningScore) {
+							game_state = "WIN";
+						} else if ( AI.score === winningScore) {
+							game_state = "LOSE";
+						} else {
+							let scoreText = player.score+" : "+AI.score;
+							drawScreen("black");
+							writeText("Scoooore!!", 40, 450, 100);
+							writeText("     "+player.name+"     "+AI.name, 20, 450, 100, 4.5)
+							writeText( scoreText, 40, 450, 100, 3);
+							writeText("press  [space]  to continue", 20, 450, 300);
+						}
+
+					}
+
+					function onWin() {
+						drawScreen("black");
+						writeText("Yeeeet!", 40, 450, 100);
+						writeText("press  [Enter]  to play again", 20, 450, 300);
+						resetScores();
+						updateScoreBoard();
+					}
+
+					function onLose() {
+						drawScreen("black");
+						writeText("G a m e  O v e r", 40, 450, 100);
+						writeText("press  [Enter]  to play again", 20, 450, 300);
+						resetScores();
+						updateScoreBoard();
 					}
 
 
@@ -259,6 +302,16 @@
 						if (game_state === "PAUSE") {
 
 						}
+						if (game_state === "SCORE") {
+							ball.xPosition = canvas.width/2;
+							ball.yPosition = canvas.height/2;
+						}
+						if (game_state === "WIN") {
+
+						}
+						if (game_state === "LOSE") {
+
+						}
 							
 					};
 		
@@ -269,17 +322,13 @@
 					};
 
 					function draw_Everything(){
-						if (game_state === "MENU") {
-							onMenu();
-						}
-						if (game_state === "PLAY") {
-							onPlay();
-						}
-						if (game_state === "PAUSE") {
-							onPause();
-						}
+						if (game_state === "MENU") 	{ onMenu();  }
+						if (game_state === "PLAY") 	{ onPlay();  }
+						if (game_state === "PAUSE") { onPause(); }
+						if (game_state === "SCORE")	{ onScore(); }
+						if (game_state === "WIN")	{ onWin();   }
+						if (game_state === "LOSE")	{ onLose();  }
 
-						
 					};
 			
 			
@@ -295,7 +344,6 @@
 						// Loop Again...
 						requestAnimationFrame(gameLoop);
 					}
-
 					requestAnimationFrame(gameLoop);
 						
 		
