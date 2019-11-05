@@ -1,0 +1,25 @@
+body {
+	background-color: black;
+	color: limegreen;
+	font-family: monospace;
+	font-size: 16px;
+}
+canvas {
+	display: block;
+    margin: 0 auto;
+    border: 2px solid limegreen;
+}
+
+ul {
+	display: block;
+	margin: 30px auto;
+	text-align: center;
+}
+
+li {
+	list-style-type: none;
+	display: inline-block;
+	margin: 0 50px;
+}
+
+div#preload { display: none; }
