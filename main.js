@@ -65,8 +65,17 @@ function HyperPong() {
 		}
 	}
 
-	let title_sfx = new SoundOverlapsClass();
-	title_sfx.load("./sounds/title");
+	let sfx_title = new SoundOverlapsClass();
+	let sfx_return_hi = new SoundOverlapsClass();
+	let sfx_return_low = new SoundOverlapsClass();
+	let sfx_boundary = new SoundOverlapsClass();
+	let sfx_score = new SoundOverlapsClass();
+
+	sfx_title.load("./sounds/title");
+	sfx_return_hi.load("./sounds/return-hi");
+	sfx_return_low.load("./sounds/return-low");
+	sfx_boundary.load("./sounds/boundary");
+	sfx_score.load("./sounds/score");
 
 
 
@@ -276,14 +285,21 @@ function HyperPong() {
 		// Checks for Y-axis boundary collision
 		// canvas.width = tableBoundary_y
 
-		ball.ySpeed = ball.yPosition >= h-tableBoundary_y || ball.yPosition  <= tableBoundary_y  ?  ball.ySpeed *=-1  :  ball.ySpeed;
+		//ball.ySpeed = ball.yPosition >= h-tableBoundary_y || ball.yPosition  <= tableBoundary_y  ?  ball.ySpeed *=-1  :  ball.ySpeed;
+
+		if (ball.yPosition <= 5 || ball.yPosition >= h-5) {
+			ball.ySpeed *= -1;
+			sfx_boundary.play();
+		} 
 
 		if(ball.xPosition <= 0) {
-			//ball.xSpeed = -ball.xSpeed; 
+			//ball.xSpeed = -ball.xSpeed;
+			sfx_score.play(); 
 			keepScore(player_2);
 		}
 		if(ball.xPosition >= w) {
 			//ball.xSpeed = -ball.xSpeed;
+			sfx_score.play();
 			keepScore(player_1);
 		}
 	}
@@ -295,6 +311,7 @@ function HyperPong() {
 			ball.yPosition >= player_1.yPosition &&
 			ball.yPosition <= (player_1.yPosition + player_1.length)) 
 		{	
+			sfx_return_low.play();
 			ballReturnCounter++;
 			adjustBallSpeed();
 			ball.xSpeed = -ball.xSpeed;
@@ -306,6 +323,7 @@ function HyperPong() {
 			ball.yPosition >= player_2.yPosition &&
 			ball.yPosition <= (player_2.yPosition + player_2.length)) 
 		{	
+			sfx_return_hi.play();
 			ballReturnCounter++;
 			adjustBallSpeed();
 			ball.xSpeed = -ball.xSpeed;
@@ -332,13 +350,13 @@ function HyperPong() {
 
 	function drawPaddle(whichPlayer) {
 		context.fillStyle = whichPlayer.color;
-		context.fillRect(whichPlayer.xPosition, whichPlayer.yPosition, whichPlayer.width, whichPlayer.length)
+		context.drawImage(el_paddleImg, whichPlayer.xPosition, whichPlayer.yPosition)
 	}
 
 	function writeText(text, size, xPos, yPos, intLineNum) {
 		if (!intLineNum) { intLineNum = 1 } 
 		const lineSpace = (intLineNum+1) * size + yPos;
-		context.fillStyle = "white";
+		context.fillStyle = "limegreen";
 		context.font = size+"px Arial";
 		context.textAlign = "center";
 		context.fillText(text, xPos, lineSpace); // canvas.w/2, 50
@@ -404,7 +422,7 @@ function HyperPong() {
 	 			title_x += title_speed;
 	 		}
 	 		if (title_x === 0) {
-	 			title_sfx.play();
+	 			sfx_title.play();
 	 		}
 	 	}
 
@@ -528,5 +546,11 @@ function HyperPong() {
 // End of the Game
 }
 
-window.onload = function(){ HyperPong(); }
+const execute = function(){ 
+
+	const btn = document.getElementById("btn");
+	btn.classList.add("hide");
+
+	HyperPong(); 
+}
 

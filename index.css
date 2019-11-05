@@ -23,3 +23,23 @@ li {
 }
 
 div#preload { display: none; }
+
+button {
+	font-size: 40px;
+	display: block;
+	margin: 20px auto;
+
+	border: solid 2px limegreen;
+	border-radius: 5px;
+	background-color: black;
+	color: limegreen;
+}
+
+button:active, button:hover, button:target {
+	border-color: white;
+	color: white;
+}
+
+.hide {
+	display: none;
+}
