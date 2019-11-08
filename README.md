@@ -1,7 +1,7 @@
 # HYPER-PONG
 
 ## About
-###This is my take on the old class game of pong.
+### This is my take on the old class game of pong.
 I've taken some liberties in not constructing a perfect recreation of the classic. The game's been constructed my current skill level in JavaScript. 
 
 #### Current Features
@@ -13,7 +13,8 @@ I've taken some liberties in not constructing a perfect recreation of the classi
 #### For the Future
 	* Multi-ball mode 
 	* Adding spin to ball upon return
-	* Perhaps a mini cannon mounted to each player's paddle that can shoot; bullets that hit the other player's paddle shorten their paddle.
+	* Perhaps a mini cannon mounted to each player's paddle that can shoot;
+	 bullets that hit the other player's paddle shorten their paddle.
 
 
 #### Challenges
