@@ -1,7 +1,7 @@
 
 
 
-function HyperPong() {
+function HyperPong(SFX) {
 	
 	"use strict";
 
@@ -10,7 +10,7 @@ function HyperPong() {
 	const { width: w, height: h } = canvas;
 	const tableBoundary_x = 5;
 	const tableBoundary_y = 5;
-
+ 
 	// Element selectors
 	const el_score_p1 = document.getElementById("p1-score");
 	const el_score_p2 = document.getElementById("p2-score");
@@ -29,54 +29,6 @@ function HyperPong() {
 	const el_paddleImg = document.getElementById("paddle");
 	let title_x = -500;
 	let title_speed = 20;
-
-
-	// SOUND FX
-	//////////////////////////////////
-	let audioFormat;
-
-	function setFormat() {
-		let audio = new Audio();
-		if (audio.canPlayType("audio/mp3")) {
-			audioFormat = ".mp3";
-		} else {
-			audioFormat = ".ogg";
-		}
-	}
-
-	function SoundOverlapsClass() {
-		this.load = function(filenameWithPath) {
-			setFormat();
-
-			this.altSoundTurn = false;
-			this.mainSound = new Audio(filenameWithPath + audioFormat);
-			this.altSound = new Audio(filenameWithPath + audioFormat);
-		}
-
-		this.play = function() {
-			if(this.altSoundTurn) {
-				this.altSound.currentTime = 0;
-				this.altSound.play();
-			} else {
-				this.mainSound.currentTime = 0;
-				this.mainSound.play();
-			}
-			this.altSoundTurn = !this.altSoundTurn;
-		}
-	}
-
-	let sfx_title = new SoundOverlapsClass();
-	let sfx_return_hi = new SoundOverlapsClass();
-	let sfx_return_low = new SoundOverlapsClass();
-	let sfx_boundary = new SoundOverlapsClass();
-	let sfx_score = new SoundOverlapsClass();
-
-	sfx_title.load("./sounds/title");
-	sfx_return_hi.load("./sounds/return-hi");
-	sfx_return_low.load("./sounds/return-low");
-	sfx_boundary.load("./sounds/boundary");
-	sfx_score.load("./sounds/score");
-
 
 
 	// GAME STATE
@@ -197,19 +149,19 @@ function HyperPong() {
 	// Paddle functions
 	//////////////////////////////////////
 	function move_P1_Paddle() {
-		if (keyControls.keys['38'] === true) {
+		if (keyControls.keys['38'] === true && player_1.yPosition > 35) {
 			player_1.yPosition -= player_1.speed;
 		}
-		if (keyControls.keys['40'] === true) {
+		if (keyControls.keys['40'] === true && player_1.yPosition < h-(player_1.length + 35)) {
 			player_1.yPosition += player_1.speed;
 		}
 	}
 
 	function move_P2_Paddle() {
-		if (keyControls.keys['87'] === true) {
+		if (keyControls.keys['87'] === true && player_2.yPosition > 35) {
 			player_2.yPosition -= player_2.speed;
 		}
-		if (keyControls.keys['83'] === true) {
+		if (keyControls.keys['83'] === true && player_1.yPosition < h-(player_2.length + 35)) {
 			player_2.yPosition += player_2.speed;
 		}
 	}
@@ -217,9 +169,9 @@ function HyperPong() {
 	function computer_moves() {
 		let generated_position = random_position();
 
-		if (generated_position < ball.yPosition) {
+		if (generated_position < ball.yPosition && player_2.yPosition < h-(player_1.length + 35)) {
 			player_2.yPosition += (player_2.speed-3);
-		} else if (generated_position > ball.yPosition) {
+		} else if (generated_position > ball.yPosition && player_2.yPosition > 35) {
 			player_2.yPosition -= (player_2.speed-3);
 		} else {};
 	}
@@ -289,17 +241,17 @@ function HyperPong() {
 
 		if (ball.yPosition <= 5 || ball.yPosition >= h-5) {
 			ball.ySpeed *= -1;
-			sfx_boundary.play();
+			SFX.boundary.play();
 		} 
 
 		if(ball.xPosition <= 0) {
 			//ball.xSpeed = -ball.xSpeed;
-			sfx_score.play(); 
+			SFX.score.play(); 
 			keepScore(player_2);
 		}
 		if(ball.xPosition >= w) {
 			//ball.xSpeed = -ball.xSpeed;
-			sfx_score.play();
+			SFX.score.play();
 			keepScore(player_1);
 		}
 	}
@@ -311,7 +263,7 @@ function HyperPong() {
 			ball.yPosition >= player_1.yPosition &&
 			ball.yPosition <= (player_1.yPosition + player_1.length)) 
 		{	
-			sfx_return_low.play();
+			SFX.returnLow.play();
 			ballReturnCounter++;
 			adjustBallSpeed();
 			ball.xSpeed = -ball.xSpeed;
@@ -323,7 +275,7 @@ function HyperPong() {
 			ball.yPosition >= player_2.yPosition &&
 			ball.yPosition <= (player_2.yPosition + player_2.length)) 
 		{	
-			sfx_return_hi.play();
+			SFX.returnHi.play();
 			ballReturnCounter++;
 			adjustBallSpeed();
 			ball.xSpeed = -ball.xSpeed;
@@ -331,6 +283,9 @@ function HyperPong() {
 			console.log("HITS:", ballReturnCounter, "| SPEED:", ball.xSpeed)		
 		}
 	} // End function
+
+
+	function handle_Paddle() {console.log("ooo")}
 
 
 	//////////////////////////////////////
@@ -375,8 +330,6 @@ function HyperPong() {
 			drawPaddle(player_2);
 			drawBall();
 			drawScreen("rgba(100, 0, 100, 0.6)");
-			writeText("P A U S E", 40, 450, 100, 1);
-			writeText("P A U S E", 40, 450, 100, 2);
 			writeText("P A U S E", 40, 450, 100, 3);
 		}
 	}
@@ -399,8 +352,6 @@ function HyperPong() {
 				move_P2_Paddle();
 				//computer_moves();
 			}
-			
-			
 		};
 
 		this.draw = function() {
@@ -422,7 +373,7 @@ function HyperPong() {
 	 			title_x += title_speed;
 	 		}
 	 		if (title_x === 0) {
-	 			sfx_title.play();
+	 			SFX.title.play();
 	 		}
 	 	}
 
@@ -544,13 +495,16 @@ function HyperPong() {
 
 
 // End of the Game
-}
+};
+
+
+
 
 const execute = function(){ 
 
 	const btn = document.getElementById("btn");
 	btn.classList.add("hide");
 
-	HyperPong(); 
+	HyperPong(SoundFX); 
 }
 
