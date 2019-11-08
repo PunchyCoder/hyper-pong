@@ -3,6 +3,14 @@
 ## About
 ### This is my take on the old class game of pong.
 I've taken some liberties in not constructing a perfect recreation of the classic. The game's been constructed my current skill level in JavaScript. 
+### Play 
+Click on the "environment" link with the little rocket icon.
+Click on the top-most "view deployment" button below and it should open up the game in another window.
+#### OR
+You can download the zipped file.
+Once the file is downloaded, just unzip/extract, and you can open the index.html file in a browser. It should work fine.
+#### Alternatively
+You can just clone this repository.
 
 #### Current Features
 	* Custom graphics(title screen art, paddles) build in Pyxel Edit. : https://www.pyxeledit.com/
