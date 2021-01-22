@@ -16,7 +16,7 @@ function HyperPong(SFX) {
 	const el_score_p2 = document.getElementById("p2-score");
 
 	// Scores
-	const winningScore = 10;
+	const winningScore = 5;
 	let p1Score = 0;
 	let p2Score = 0;
 
@@ -40,10 +40,6 @@ function HyperPong(SFX) {
 	// Ball to Paddle collisions
 	let ballReturnCounter = 0;
 
-	// function preloader() {
-	// 	// complete ( image.complete = true/false )
-	// 	// src (image.src = 'url')
-	// }
 
 	//////////////////////////////////////
 	// Player Paddle constructor
