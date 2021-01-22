@@ -22,6 +22,7 @@ li {
 	margin: 0 50px;
 }
 
+
 div#preload { display: none; }
 
 button {
@@ -42,4 +43,11 @@ button:active, button:hover, button:target {
 
 .hide {
 	display: none;
+}
+
+.wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
 }
